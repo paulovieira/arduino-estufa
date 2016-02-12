@@ -1,15 +1,15 @@
 
 
-## prepare a postgres database to save the data
+### prepare a postgres database to save the data
 
-create database and table
-
+1) create database and table
+```bash
 psql --command="create database arduino"
 psql --command="create table readings(id serial primary key, data jsonb);" arduino
-
-insert some dummy data and read it
-
+```
+2) insert some dummy data and and verify
+```bash
 psql --command="insert into readings(data) values ('{\"temperature\": 1.1}'), ('{\"temperature\": 2.2}');" arduino
 psql --command="select * from reading" arduino
-
+```
 
