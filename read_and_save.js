@@ -1,10 +1,13 @@
 var SP = require("serialport");
 var Fs = require("fs-extra");
-
+var Pg = require("pg");
+var Config = require("./config/defaults");
 var arduinoPort = {};
 var obj;
 var serialPort;
 var csvPath = "data/arduino.csv";
+
+console.log(Config);
 
 ensureCSV();
 
@@ -77,8 +80,8 @@ function saveData(obj) {
     obj["memoryUsage"] = process.memoryUsage();
     console.log(obj);
 
-    //saveToPostgres(obj)
     saveToCSV(obj);
+    saveToPostgres(obj);
 }
 
 function ensureCSV(){
@@ -104,5 +107,28 @@ function saveToCSV(obj){
 }
 
 function saveToPostgres(obj){
-	
+
+    Pg.connect(Config.pg, function(err, client, done) {
+
+        if (err) {
+            console.error("PG: couldn't fetch a client from pool", err);
+            return;
+        }
+
+        var query = `
+            INSERT INTO readings(data) VALUES('${ JSON.stringify(obj) }');
+        `;
+
+        client.query(query, undefined, function(err, result) {
+
+            //call `done()` to release the client back to the pool
+            done();
+
+            if (err) {
+                return console.error('Error running query', err);
+            }
+
+        });
+    });
+
 }
