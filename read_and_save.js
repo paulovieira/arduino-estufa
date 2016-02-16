@@ -53,8 +53,7 @@ SP.list(function(err, ports){
                 console.log("Connection successful");
                 serialPort.on("data", parseData);
 
-
-
+/*
                 setTimeout(function(){
                     serialPort.emit("data", "<data>");
                 }, 2000);
@@ -93,6 +92,8 @@ SP.list(function(err, ports){
                 setTimeout(function(){
                     serialPort.emit("data", "</data>");
                 }, 4050);
+*/
+
             });
 
             break;
