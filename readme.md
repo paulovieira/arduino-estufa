@@ -16,6 +16,7 @@ The processing is done with 2 separate scripts:
 ```bash
 psql --command="create database arduino"
 psql --command="create table readings(id serial primary key, data jsonb, remote boolean default false);" arduino
+psql --command="create table errors(id serial primary key, data jsonb, remote boolean default false);" arduino
 ```
 2) insert some dummy data and and verify
 ```bash

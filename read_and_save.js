@@ -10,18 +10,17 @@ var csvPath = Path.join(__dirname, "./data/arduino.csv");
 var configPath = Path.join(__dirname, "./config/defaults");
 var errorsPath = Path.join(__dirname, "./data/errors.log");
 
-var Config = require(configPath);
+//var Config = require(configPath);
 
 var obj = {};
 
-ensureCSV();
+ensureDataFiles();
 
 SP.list(function(err, ports){
 
     if (err) {
         console.err("Could not list the serial ports: \n", err.message);
-        err["ts"] = new Date().toISOString();
-        Fs.appendFile(errorsPath, JSON.stringify(err, 0, 4) + "\n\n");
+        saveData(err);
         return;
     }
 
@@ -46,15 +45,54 @@ SP.list(function(err, ports){
             serialPort.open(function(err) {
 
                 if (err) {
-                    console.log("Failed to open connection: " + error);
-                    err["ts"] = new Date().toISOString();
-                    Fs.appendFile(errorsPath, JSON.stringify(err, 0, 4) + "\n\n");
+                    console.log("Failed to open connection: " + err.message);
+                    saveData(err);
                     return;
                 }
 
                 console.log("Connection successful");
                 serialPort.on("data", parseData);
 
+
+
+                setTimeout(function(){
+                    serialPort.emit("data", "<data>");
+                }, 2000);
+                setTimeout(function(){
+                    serialPort.emit("data", "chip: DS18B20");
+                }, 2010);
+                setTimeout(function(){
+                    serialPort.emit("data", "rom: 28 FF 40 F6 64 15 2 4D");
+                }, 2020);
+                setTimeout(function(){
+                    serialPort.emit("data", "ts: 2016-02-12T15:08:52.985Z");
+                }, 2030);
+                setTimeout(function(){
+                    serialPort.emit("data", "temperature: 20.44");
+                }, 2040);
+                setTimeout(function(){
+                    serialPort.emit("data", "</data>");
+                }, 2050);
+
+
+                setTimeout(function(){
+                    serialPort.emit("data", "<data>");
+                }, 4000);
+                setTimeout(function(){
+                    serialPort.emit("data", "chip: dht11");
+                }, 4010);
+                setTimeout(function(){
+                    serialPort.emit("data", "ts: 2016-02-12T15:08:52.985Z");
+                }, 4030);
+                setTimeout(function(){
+                    serialPort.emit("data", "temperature: 21.44");
+                }, 4040);
+                setTimeout(function(){
+                    serialPort.emit("data", "humidity: 70.44");
+                }, 4045);
+                setTimeout(function(){
+                    serialPort.emit("data", "</data>");
+                }, 4050);
             });
 
             break;
@@ -63,8 +101,8 @@ SP.list(function(err, ports){
 
     if (!foundArduino){
 		console.log("No arduino found");
-        obj["chip"] = "NONE";
-        saveData(obj);
+        saveData(new Error("No arduino found"));
+        return;
     }
 });
 
@@ -76,7 +114,7 @@ process.on("SIGINT", function(){
 function parseData(line) {
 
     var a = line.split(":");
-    //console.log(Date.now() + ": " + line);
+    console.log(Date.now() + ": " + line);
 
     if (a[0].indexOf("<data>")!==-1) {
         obj = {};
@@ -93,40 +131,46 @@ function saveData(obj) {
     obj["ts"] = new Date().toISOString();
     console.log(obj);
 
-    saveToCSV(obj);
+    saveToFile(obj);
     saveToPostgres(obj);
 }
 
-function ensureCSV(){
-    
-    Fs.ensureFileSync(csvPath);
-    var stats = Fs.statSync(csvPath);
-    if(stats.size===0){
-        var header = "chip,rom,ts,temperature,humidity\n";
-        Fs.writeFileSync(csvPath, header);
+
+function saveToFile(obj){
+
+    if(obj instanceof Error){
+        Fs.appendFile(errorsPath, JSON.stringify(obj, ["message", "ts"], 4) + "\n\n");
     }
+    else{
+        var line = "";
+        line += (obj["chip"]        || "") + ",";
+        line += (obj["rom"]         || "") + ",";
+        line += (obj["ts"]          || "") + ",";
+        line += (obj["temperature"] || "") + ",";
+        line += (obj["humidity"]    || "") + "\n";
+
+        Fs.appendFileAsync(csvPath, line)
+            .then(function(){
+                console.log("Data saved to CSV file");
+            });        
+    }
+
 }
 
-function saveToCSV(obj){
-
-	var line = "";
-	line += (obj["chip"]        || "") + ",";
-	line += (obj["rom"]         || "") + ",";
-	line += (obj["ts"]          || "") + ",";
-	line += (obj["temperature"] || "") + ",";
-	line += (obj["humidity"]    || "") + "\n";
-
-	Fs.appendFileAsync(csvPath, line)
-        .then(function(){
-            console.log("Data saved to CSV file");
-        });
-}
-
+var loop = false;
 function saveToPostgres(obj){
 
-    var insert = `
-        INSERT INTO readings(data) VALUES('${ JSON.stringify(obj) }');
-    `;
+    if(obj instanceof Error){
+        var insert = `
+            INSERT INTO errors(data) VALUES('${ JSON.stringify(obj, ["message", "ts"]) }');
+        `;
+    }
+    else{
+        var insert = `
+            INSERT INTO readings(data) VALUES('${ JSON.stringify(obj) }');
+        `;
+    }
+
     Db.query(insert)
         .then(function(){
 
@@ -134,8 +178,23 @@ function saveToPostgres(obj){
         })
         .catch(function(err){
 
-            err["ts"] = new Date().toISOString();
-            console.log(JSON.stringify(err, 0, 4));
-            Fs.appendFile(errorsPath, JSON.stringify(err, 0, 4) + "\n\n");
+            if(loop===false){
+                loop = true;
+                saveData(err);
+            }
+            
         });
+}
+
+function ensureDataFiles(){
+    
+    Fs.ensureFileSync(errorsPath);
+    Fs.ensureFileSync(csvPath);
+
+    // make sure the csv file has the header
+    var stats = Fs.statSync(csvPath);
+    if(stats.size===0){
+        var header = "chip,rom,ts,temperature,humidity\n";
+        Fs.writeFileSync(csvPath, header);
+    }
 }
