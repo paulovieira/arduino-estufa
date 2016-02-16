@@ -1,4 +1,5 @@
-const Readline = require('readline');
+process.title = "estufa_read";
+
 var Path = require("path");
 var Promise = require('bluebird');
 var Fs = Promise.promisifyAll(require('fs-extra'));
@@ -12,8 +13,6 @@ var errorsPath = Path.join(__dirname, "./data/errors.log");
 var Config = require(configPath);
 
 var obj = {};
-
-process.title = "estufa_read";
 
 ensureCSV();
 
