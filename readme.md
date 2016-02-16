@@ -1,9 +1,13 @@
-## arduino-estufa - read data from an arduino, save to postgres and send to a google sheet (in use at FCUL)
+## arduino-estufa
+
+Objective: read data from an arduino, save to postgres and send to a google sheet (in use at FCUL).
 
 ### introduction
 
 The processing is done with 2 separate scripts:
+
 1) `read_and_save.js` - will connect to the arduino (using the `serialport` module), fetch the data and save to a local postgres database (as well as to a csv file for a quick inspection)
+
 2) `upload.js` - will send the data to a google sheet
 
 ### prepare a postgres database to save the data
@@ -22,7 +26,8 @@ psql --command="select * from readings" arduino
 ### set up crontab
 
 `read_and_save.js` will be called every 5 min.
-`upload.js` - will be called every 30 min.
+
+`upload.js` will be called every 30 min.
 
 Open the crontab editor (should be executed as a superuser because we need to open a connection to a serial port):
 ```bash
