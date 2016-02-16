@@ -41,6 +41,10 @@ Add at the end:
 */30 * * * * cd /home/pvieira/github/arduino-estufa && node ./upload.js
 00 05 * * * /sbin/shutdown -r now
 
+#network manager seems to fail with eduroam
+@reboot sleep 60 && sudo /sbin/dhclient -r
+*/30 * * * * sudo /sbin/dhclient -r
+
 ```
 
 Finally:
