@@ -5,6 +5,7 @@
     "fs-extra": "^0.26.5",
     "pg": "^4.4.4",
     "pg-promise": "^3.1.7",
-    "serialport": "^2.0.6"
+    "serialport": "^2.0.6",
+    "shelljs": "^0.6.0"
   }
 }
