@@ -1,7 +1,9 @@
 process.title = "estufa_read";
 
 var Path = require("path");
+var _ = require("underscore");
 var Promise = require('bluebird');
+
 var Fs = Promise.promisifyAll(require('fs-extra'));
 var SP = require("serialport");
 var Db = require("./config/db");
@@ -13,6 +15,8 @@ var errorsPath = Path.join(__dirname, "./data/errors.log");
 //var Config = require(configPath);
 
 var obj = {};
+var bundle = [];
+var cycleIsRunning = false;
 
 ensureDataFiles();
 
@@ -120,12 +124,43 @@ function parseData(line) {
     if (a[0].indexOf("<data>")!==-1) {
         obj = {};
     } else if (a[0].indexOf("</data>")!==-1 && obj) {
-        saveData(obj);
+        //saveData(_.clone(obj));
+        pushToBundle(_.clone(obj));
     }
 
     if (obj && a[0] !== undefined && a[1] !== undefined) {
-        obj[a[0].trim()] = a[1].trim();
+        obj[a[0].trim().toLowerCase()] = a[1].trim();
     }
+}
+
+
+function pushToBundle(obj){
+
+    // initiate the cycle
+    if(obj["chip"].toLowerCase() === "sht1x"){
+        bundle = [];
+        bundle.push(obj);
+        cycleIsRunning = true;
+    }
+
+TODO: ...
+    // finalize tue cycle
+    if(obj["chip"].toLowerCase() === "ds18b20" && 
+        obj["rom"].toLowerCase().indexOf("5f")!==-1 &&
+        cycleIsRunning === true){
+
+        bundle.push(obj);
+        bundles.push(bundle);
+
+        if(bundles.length === 10){
+            calculateStatistics();
+        }
+        cycleIsRunning = false;
+    }
+}
+
+function calculateStatistics(){
+
 }
 
 function saveData(obj) {
