@@ -1,0 +1,35 @@
+{
+    "message": "Cannot open /dev/ttyACM0",
+    "ts": "2016-03-15T19:16:25.656Z"
+}
+
+{
+    "message": "Cannot open /dev/ttyACM0",
+    "ts": "2016-03-15T19:18:43.991Z"
+}
+
+{
+    "message": "Cannot open /dev/ttyACM0",
+    "ts": "2016-03-15T19:18:47.769Z"
+}
+
+{
+    "message": "No arduino found",
+    "ts": "2016-03-15T19:19:17.602Z"
+}
+
+{
+    "message": "No arduino found",
+    "ts": "2016-03-15T19:19:35.200Z"
+}
+
+{
+    "message": "Cannot open /dev/ttyACM0",
+    "ts": "2016-03-15T19:21:25.238Z"
+}
+
+{
+    "message": "Cannot open /dev/ttyACM0",
+    "ts": "2016-03-15T19:21:28.577Z"
+}
+

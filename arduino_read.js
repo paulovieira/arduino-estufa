@@ -1,4 +1,4 @@
-process.title = "estufa_read";
+process.title = "arduino_read";
 
 var Path = require("path");
 var _ = require("underscore");
@@ -8,9 +8,9 @@ var Fs = Promise.promisifyAll(require('fs-extra'));
 var SP = require("serialport");
 var Db = require("./config/db");
 
-var csvPath = Path.join(__dirname, "./data/arduino.csv");
-var configPath = Path.join(__dirname, "./config/defaults");
-var errorsPath = Path.join(__dirname, "./data/errors.log");
+var csvPath = Path.resolve("./data/average.csv");
+var configPath = Path.resolve("./config/defaults");
+var logFilePath = Path.resolve("./data/log.txt");
 
 //var Config = require(configPath);
 
@@ -24,7 +24,7 @@ SP.list(function(err, ports){
 
     if (err) {
         console.err("Could not list the serial ports: \n", err.message);
-        saveData(err);
+        saveToLog(err);
         return;
     }
 
@@ -49,8 +49,7 @@ SP.list(function(err, ports){
             serialPort.open(function(err) {
 
                 if (err) {
-                    console.log("Failed to open connection: " + err.message);
-                    saveData(err);
+                    saveToLog(err);
                     return;
                 }
 
@@ -105,8 +104,7 @@ SP.list(function(err, ports){
     }
 
     if (!foundArduino){
-		console.log("No arduino found");
-        saveData(new Error("No arduino found"));
+        saveToLog(new Error("No arduino found"));
         return;
     }
 });
@@ -124,7 +122,7 @@ function parseData(line) {
     if (a[0].indexOf("<data>")!==-1) {
         obj = {};
     } else if (a[0].indexOf("</data>")!==-1 && obj) {
-        //saveData(_.clone(obj));
+        //saveToLog(_.clone(obj));
         pushToBundle(_.clone(obj));
     }
 
@@ -133,8 +131,11 @@ function parseData(line) {
     }
 }
 
-
+/*
 function pushToBundle(obj){
+
+    console.log("save in t_raw");
+    console.log(obj);
 
     // initiate the cycle
     if(obj["chip"].toLowerCase() === "sht1x"){
@@ -157,42 +158,78 @@ TODO: ...
         }
         cycleIsRunning = false;
     }
-}
-
-function calculateStatistics(){
 
 }
+*/
 
-function saveData(obj) {
+function saveToLog(obj) {
     obj["ts"] = new Date().toISOString();
     console.log(obj);
 
-    saveToFile(obj);
-    saveToPostgres(obj);
+    saveToLogFile(obj);
+    saveToLogTable(obj);
 }
 
 
-function saveToFile(obj){
+function saveToLogFile(obj){
 
+    var data;
     if(obj instanceof Error){
-        Fs.appendFile(errorsPath, JSON.stringify(obj, ["message", "ts"], 4) + "\n\n");
+        data = JSON.stringify(obj, ["message", "ts"], 4) + "\n\n"
     }
     else{
-        var line = "";
-        line += (obj["chip"]        || "") + ",";
-        line += (obj["rom"]         || "") + ",";
-        line += (obj["ts"]          || "") + ",";
-        line += (obj["temperature"] || "") + ",";
-        line += (obj["humidity"]    || "") + "\n";
-
-        Fs.appendFileAsync(csvPath, line)
-            .then(function(){
-                console.log("Data saved to CSV file");
-            });        
+        throw new Error("obj should be an error instance");
     }
+
+    Fs.appendFileAsync(logFilePath, data)
+        .then(function(){
+            console.log("Data saved in the log file");
+        })
+        .catch(function(){
+            console.log("Data not saved in the log file")
+        });
+
+    // else{
+    //     var line = "";
+    //     line += (obj["chip"]        || "") + ",";
+    //     line += (obj["rom"]         || "") + ",";
+    //     line += (obj["ts"]          || "") + ",";
+    //     line += (obj["temperature"] || "") + ",";
+    //     line += (obj["humidity"]    || "") + "\n";
+
+    //     Fs.appendFileAsync(csvPath, line)
+    //         .then(function(){
+    //             console.log("Data saved to CSV file");
+    //         });        
+    // }
 
 }
 
+
+function saveToLogTable(obj){
+
+    var data;
+    if(obj instanceof Error){
+        data = JSON.stringify(obj, ["message", "ts"], 4) + "\n\n"
+    }
+    else{
+        throw new Error("obj should be an error instance");
+    }
+
+    var insert = `
+        INSERT INTO t_log(data) VALUES('${ data }');
+    `;   
+
+    Db.query(insert)
+        .then(function(){
+            console.log("Data saved in the log table");
+        })
+        .catch(function(err){
+            console.log("Data not saved in the log table");
+        });
+}
+
+/*
 var loop = false;
 function saveToPostgres(obj){
 
@@ -216,21 +253,24 @@ function saveToPostgres(obj){
 
             if(loop===false){
                 loop = true;
-                saveData(err);
+                saveToLog(err);
             }
             
         });
 }
-
+*/
 function ensureDataFiles(){
     
-    Fs.ensureFileSync(errorsPath);
+    Fs.ensureFileSync(logFilePath);
+
+/*
     Fs.ensureFileSync(csvPath);
 
     // make sure the csv file has the header
     var stats = Fs.statSync(csvPath);
     if(stats.size===0){
-        var header = "chip,rom,ts,temperature,humidity\n";
+        var header="ts,t_4d,t_6a,t_5f,t_sht1x,h_sht1x,t_sht1x2,h_sht1x2,t_sht1x3,h_sht1x3\n";
         Fs.writeFileSync(csvPath, header);
     }
+*/
 }
