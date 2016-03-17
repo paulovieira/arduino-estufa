@@ -2,7 +2,7 @@ var Dns = require("dns");
 var Shell = require("shelljs")
 var Log = require("./log");
 
-Dns.lookup("godqwdqdogle.com", {family: 4}, function(err, address, family) {
+Dns.lookup("google.com", {family: 4}, function(err, address, family) {
 
     if(err){
         Log(err, ["message", "code", "errno", "syscall", "ts"]);
