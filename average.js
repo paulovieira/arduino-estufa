@@ -61,6 +61,13 @@ Promise.all([getAverageSHT(), getAverageDS18B20()])
 
         Db.query(insert)
             .then(function(){
+
+                var deleteQuery = `
+                    DELETE FROM t_raw; 
+                `;      
+                return Db.query(deleteQuery);
+            })
+            .then(function(){
                 console.log("Data saved in the t_avg table");
             })
             .catch(function(err){
