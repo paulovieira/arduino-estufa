@@ -1,35 +1,38 @@
 {
     "message": "Cannot open /dev/ttyACM0",
-    "ts": "2016-03-15T19:16:25.656Z"
+    "ts": "2016-03-17T11:40:13.785Z"
 }
 
 {
     "message": "Cannot open /dev/ttyACM0",
-    "ts": "2016-03-15T19:18:43.991Z"
+    "ts": "2016-03-17T11:40:28.169Z"
 }
 
 {
-    "message": "Cannot open /dev/ttyACM0",
-    "ts": "2016-03-15T19:18:47.769Z"
+    "message": "upload interval is not defined",
+    "ts": "2016-03-17T12:34:22.648Z"
 }
 
 {
-    "message": "No arduino found",
-    "ts": "2016-03-15T19:19:17.602Z"
+    "message": "date/time value \"undefined minute\" is no longer supported",
+    "ts": "2016-03-17T12:34:22.667Z"
 }
 
 {
-    "message": "No arduino found",
-    "ts": "2016-03-15T19:19:35.200Z"
+    "message": "upload interval is not defined",
+    "ts": "2016-03-17T12:35:10.445Z"
 }
 
 {
-    "message": "Cannot open /dev/ttyACM0",
-    "ts": "2016-03-15T19:21:25.238Z"
+    "message": "date/time value \"undefined minute\" is no longer supported",
+    "ts": "2016-03-17T12:35:10.464Z"
 }
 
 {
-    "message": "Cannot open /dev/ttyACM0",
-    "ts": "2016-03-15T19:21:28.577Z"
+    "message": "getaddrinfo ENOTFOUND godqwdqdogle.com",
+    "code": "ENOTFOUND",
+    "errno": "ENOTFOUND",
+    "syscall": "getaddrinfo",
+    "ts": "2016-03-17T13:04:02.494Z"
 }
 

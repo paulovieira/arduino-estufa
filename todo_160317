@@ -36,8 +36,8 @@ insert into t_avg(data) values('
 TODO:
 
 DONE add minute trigger
-package json - add fecha
-data in t_avg should be lower case always
-in the average.js script, we must save to the files as well (CSV and log.txt)
+DONE package json - add fecha
+DONE data in t_avg should be lower case always
+DONE in the average.js script, we must save to the files as well (CSV and log.txt)
 upload the errors as well (?)
 inverter valores (os mais recentes primeiro)

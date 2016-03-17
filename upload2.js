@@ -6,12 +6,13 @@ var Fs = Promise.promisifyAll(require('fs-extra'));
 var Spreadsheet = Promise.promisifyAll(require('edit-google-spreadsheet'));
 var Db = require("./config/db");
 var Fecha = require("fecha")
+var Log = require("./log");
 
 var logFilePath = Path.resolve("./data/log.txt");
 Fs.ensureFileSync(logFilePath);
 
-var Config = require(Path.join(__dirname, "./config/defaults"));
-var sheet, sheetErrors, data;
+var Config = require(Path.resolve("./config/defaults"));
+var sheet, data;
 
 
 
@@ -97,7 +98,7 @@ Promise.resolve()
                 })
                 .catch(function(err){
 
-                    saveToLog(err);
+                    Log(err);
                 });
 
         }
@@ -108,60 +109,6 @@ Promise.resolve()
     })
     .catch(function(err){
 
-        saveToLog(err);
+        Log(err);
     });
 
-
-
-
-function saveToLog(obj) {
-    obj["ts"] = new Date().toISOString();
-    console.log(obj);
-
-    saveToLogFile(obj);
-    saveToLogTable(obj);
-}
-
-
-function saveToLogFile(obj){
-
-    var data;
-    if(obj instanceof Error){
-        data = JSON.stringify(obj, ["message", "ts"], 4) + "\n\n"
-    }
-    else{
-        throw new Error("obj should be an error instance");
-    }
-
-    Fs.appendFileAsync(logFilePath, data)
-        .then(function(){
-            console.log("Data saved in the log file");
-        })
-        .catch(function(){
-            console.log("Data not saved in the log file")
-        });
-};
-
-
-function saveToLogTable(obj){
-
-    var data;
-    if(obj instanceof Error){
-        data = JSON.stringify(obj, ["message", "ts"], 4) + "\n\n"
-    }
-    else{
-        throw new Error("obj should be an error instance");
-    }
-
-    var insert = `
-        INSERT INTO t_log(data) VALUES('${ data }');
-    `;   
-
-    Db.query(insert)
-        .then(function(){
-            console.log("Data saved in the log table");
-        })
-        .catch(function(err){
-            console.log("Data not saved in the log table");
-        });
-}
