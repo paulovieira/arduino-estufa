@@ -53,7 +53,7 @@ Promise.resolve()
 
                         newRows.push([
 
-                            Fecha.format(new Date(obj["ts"]), "YYYY-MM-DD hh:mm"),
+                            Fecha.format(new Date(obj["ts"]), "YYYY-MM-DD HH:mm"),
 
                             // in the numbers, replace dots with commas to avoid
                             // problems at the google sheets side (it might think
