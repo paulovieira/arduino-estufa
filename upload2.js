@@ -52,16 +52,21 @@ Promise.resolve()
                     data.forEach(function(obj){
 
                         newRows.push([
+
                             Fecha.format(new Date(obj["ts"]), "YYYY-MM-DD hh:mm"),
-                            obj["4d"]["temperature"] || "",
-                            obj["5f"]["temperature"] || "",
-                            obj["6a"]["temperature"] || "",
-                            obj["sht1x"]["temperature"] || "",
-                            obj["sht1x"]["humidity"] || "",
-                            obj["sht1x2"]["temperature"] || "",
-                            obj["sht1x2"]["humidity"] || "",
-                            obj["sht1x3"]["temperature"] || "",
-                            obj["sht1x3"]["humidity"] || ""
+
+                            // in the numbers, replace dots with commas to avoid
+                            // problems at the google sheets side (it might think
+                            // it is a date for values like "12.9")
+                            (obj["4d"]["temperature"] || "").replace(".", ","),
+                            (obj["5f"]["temperature"] || "").replace(".", ","),
+                            (obj["6a"]["temperature"] || "").replace(".", ","),
+                            (obj["sht1x"]["temperature"] || "").replace(".", ","),
+                            (obj["sht1x"]["humidity"] || "").replace(".", ","),
+                            (obj["sht1x2"]["temperature"] || "").replace(".", ","),
+                            (obj["sht1x2"]["humidity"] || "").replace(".", ","),
+                            (obj["sht1x3"]["temperature"] || "").replace(".", ","),
+                            (obj["sht1x3"]["humidity"] || "").replace(".", ",")
 
                         ]);
                     });
