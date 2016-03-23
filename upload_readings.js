@@ -14,7 +14,7 @@ Fs.ensureFileSync(logFilePath);
 var Config = require(Path.resolve("./config/defaults"));
 var sheet, data;
 
-
+console.log("Sending readings...");
 
 Promise.resolve()
     .then(function(){
@@ -41,14 +41,12 @@ Promise.resolve()
 
                     var rows = args[0], info = args[1];
 
-                    console.log("args: ", args);
-                    console.log("rows: ", rows);
-                    console.log("info: ", info);
+                    console.log("args: \n", args);
+                    console.log("rows: \n", rows);
+                    console.log("info: \n", info);
 
                     var newRows = [];
 
-                    // newRows.push([10,11,12])
-                    // newRows.push([30,31,32])
                     data.forEach(function(obj){
 
                         newRows.push([
@@ -71,7 +69,7 @@ Promise.resolve()
                         ]);
                     });
 
-                    console.log("newRows", newRows)
+                    console.log("newRows\n", newRows);
 
                     // append these lines at the end of the sheet
                     var newData = {};

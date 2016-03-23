@@ -10,7 +10,7 @@ The processing is done with 3 separate scripts:
 
 2) `average.js` - will be executed every 30min by cron; for each sensor, it will select the data from the last 30min, exclude outliers, compute the average and save a new line in the "t_avg" table
 
-3) `upload.js` - will be executed right after `average.js`; it will send the data in "t_avg" that hasn't already been sent (the "sent_to_cloud" column is used to indicate that)
+3) `upload_readings.js` - will be executed right after `average.js`; it will send the data in "t_avg" that hasn't already been sent (the "sent_to_cloud" column is used to indicate that)
 
 ### prepare a postgres database to save the data
 
@@ -19,7 +19,6 @@ The processing is done with 3 separate scripts:
 psql --command="create database arduino"
 
 psql --command="create table t_raw( \
-                    id serial primary key, \
                     chip text, \
                     rom text, \
                     temperature text, \
@@ -90,7 +89,7 @@ order by rom;
 
 `arduino_read.js` is restarted every 5 min
 
-`averages.js` and `upload.js` will be called every 30 min.
+`averages.js` and `upload_readings.js` will be called every 30 min.
 
 Open the crontab editor (should be executed as a superuser because we need to open a connection to a serial port):
 ```bash
@@ -100,7 +99,7 @@ sudo crontab -e
 Add at the end:
 ```bash
 */5 * * * * cd /home/pvieira/github/arduino-estufa; bash ./arduino_read_restart.sh;
-*/30 * * * * cd /home/pvieira/github/arduino-estufa; node ./average.js; sleep 10; node ./dhclient.js; sleep 20; node ./upload2.js;
+*/30 * * * * cd /home/pvieira/github/arduino-estufa; node ./average.js; sleep 10; node ./dhclient.js; sleep 20; node ./upload_readings.js;
 
 @reboot sleep 50; cd /home/pvieira/github/arduino-estufa; bash ./arduino_read_restart.sh;
 
