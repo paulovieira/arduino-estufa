@@ -32,8 +32,13 @@ Promise.all([getAverageSHT(), getAverageDS18B20()])
         var temp = _.extend({}, _.indexBy(data[0], "chip"), _.indexBy(data[1], "rom"));
         //console.log("temp\n", temp);
 
+	// get a timestamp in ISO8601 (removing the timezone and taking into account the daylight saving period)
+	var now = new Date();
+	var tzoffset = (now.getTimezoneOffset()*60000);  // will be "-60" for the summer hour
+	var ts = (new Date(now - tzoffset)).toISOString().slice(0,-5);
+	
         var obj = {
-            ts: new Date().toISOString()
+            ts: ts
         };
         for(var key in temp){
             for(var key2 in temp[key]){

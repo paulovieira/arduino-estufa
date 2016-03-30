@@ -98,18 +98,20 @@ sudo crontab -e
 
 Add at the end:
 ```bash
-*/5 * * * * cd /home/pvieira/github/arduino-estufa; bash ./arduino_read_restart.sh;
-*/30 * * * * cd /home/pvieira/github/arduino-estufa; node ./average.js; sleep 10; node ./dhclient.js; sleep 20; node ./upload_readings.js;
 
-@reboot sleep 50; cd /home/pvieira/github/arduino-estufa; bash ./arduino_read_restart.sh;
+# restart the script that is reading data from the arduino every 10 minutes
+*/10 * * * * cd /home/pi/github/arduino-estufa; bash ./arduino_read_restart.sh;
 
-# call dhclient to renew the ip; it seems we have to this because the connection to eduroam might dro periodically
-# TODO: improve this
-@reboot sleep 90; sudo /sbin/dhclient -r;
-*/30 * * * * sudo /sbin/dhclient -r;
+# send readings every 1 hour
+*/3 * * * * cd /home/pi/github/arduino-estufa;  node ./average.js;  node ./dhclient.js;  sleep 20;  node ./upload_readings.js;
+
+# send logs every 6 hours
+*/4 * * * * cd /home/pi/github/arduino-estufa;  node ./dhclient.js;  sleep 20;  node ./upload_log.js;
 
 # restart the rpi at 5 in the morning
-00 05 * * * /sbin/shutdown -r now;
+00 05 * * * /sbin/shutdown -r now
+@reboot sleep 50; cd /home/pi/github/arduino-estufa; bash ./arduino_read_restart.sh;
+
 ```
 
 Finally:
@@ -123,3 +125,14 @@ sudo service cron restart
 All details here: https://www.nczonline.net/blog/2014/03/04/accessing-google-spreadsheets-from-node-js/
 
 Note: to see the email address associated with the service account, click the "Manage service accounts" link (in the "Credentials" screen).
+
+### change the interval to send the readings
+
+To send data every hour we must change in 2 places:
+1) in the crontab: "0 */1 * * * command1; command2;"
+
+This means: "execute the commands on every hour that is divisible by 1, and when the minute is 0"
+
+2) in the configuration file
+
+Change the value in "uploadInterval" (in minutes).
