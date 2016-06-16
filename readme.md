@@ -100,17 +100,17 @@ Add at the end:
 ```bash
 
 # restart the script that is reading data from the arduino every 10 minutes
-*/10 * * * * cd /home/pi/github/arduino-estufa; bash ./arduino_read_restart.sh;
+*/10 * * * * cd /home/pi/github/arduino-estufa  &&  bash ./arduino_read_restart.sh
 
 # send readings every 1 hour
-*/3 * * * * cd /home/pi/github/arduino-estufa;  node ./average.js;  node ./dhclient.js;  sleep 20;  node ./upload_readings.js;
+0 */1 * * * cd /home/pi/github/arduino-estufa  &&  node ./average.js  &&  node ./dhclient.js  &&  sleep 20  &&  node ./upload_readings.js
 
 # send logs every 6 hours
-*/4 * * * * cd /home/pi/github/arduino-estufa;  node ./dhclient.js;  sleep 20;  node ./upload_log.js;
+0 */6 * * * cd /home/pi/github/arduino-estufa  &&  node ./dhclient.js  &&  sleep 20  &&  node ./upload_log.js
 
 # restart the rpi at 5 in the morning
 00 05 * * * /sbin/shutdown -r now
-@reboot sleep 50; cd /home/pi/github/arduino-estufa; bash ./arduino_read_restart.sh;
+@reboot sleep 50  &&  cd /home/pi/github/arduino-estufa  &&  bash ./arduino_read_restart.sh
 
 ```
 
@@ -129,9 +129,9 @@ Note: to see the email address associated with the service account, click the "M
 ### change the interval to send the readings
 
 To send data every hour we must change in 2 places:
-1) in the crontab: "0 */1 * * * command1; command2;"
+1) in the crontab: "0 */1 * * * command1  &&  command2"
 
-This means: "execute the commands on every hour that is divisible by 1, and when the minute is 0"
+This means: "execute the commands on every hour that is divisible by 1, and when the minute is 0; command2 is executed only after command1 has terminated, and only if command1 terminated successfully;"
 
 2) in the configuration file
 
